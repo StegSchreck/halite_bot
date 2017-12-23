@@ -17,7 +17,7 @@ import logging
 
 # GAME START
 # Here we define the bot's name as Settler and initialize the game, including communication with the Halite engine.
-game = hlt.Game("StegSchreck")
+game = hlt.Game("Settler")
 # Then we print our start message to the logs
 logging.info("Starting my Settler bot!")
 
@@ -28,21 +28,17 @@ while True:
 
     # Here we define the set of commands to be sent to the Halite engine at the end of the turn
     command_queue = []
-    planet_queue = []
     # For every ship that I control
-    ships = game_map.get_me().all_ships()
-    for ship in ships:
+    for ship in game_map.get_me().all_ships():
         # If the ship is docked
         if ship.docking_status != ship.DockingStatus.UNDOCKED:
             # Skip this ship
             continue
 
         # For each planet in the game (only non-destroyed planets are included)
-        planets = game_map.all_planets()
-        sorted_planets = sorted(planets, key=lambda p: p.calculate_distance_between(ship))
-        for planet in sorted_planets:
+        for planet in game_map.all_planets():
             # If the planet is owned
-            if planet.is_owned() or planet in planet_queue:
+            if planet.is_owned():
                 # Skip this planet
                 continue
 
@@ -62,9 +58,8 @@ while True:
                 navigate_command = ship.navigate(
                     ship.closest_point_to(planet),
                     game_map,
-                    speed=int(hlt.constants.MAX_SPEED)
-                )
-                planet_queue.append(planet_queue)
+                    speed=int(hlt.constants.MAX_SPEED/2),
+                    ignore_ships=True)
                 # If the move is possible, add it to the command_queue (if there are too many obstacles on the way
                 # or we are trapped (or we reached our destination!), navigate_command will return null;
                 # don't fret though, we can run the command again the next turn)
